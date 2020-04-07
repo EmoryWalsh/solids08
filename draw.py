@@ -2,8 +2,53 @@ from display import *
 from matrix import *
 from gmath import *
 
-def scanline_convert(polygons, i, screen, zbuffer ):
-    pass
+def scanline_convert(polygons, i):#, screen, zbuffer ):
+    p1 = polygons[i]
+    p2 = polygons[i+1]
+    p3 = polygons[i+2]
+    #find the top point
+    if(p1[1] >= p2[1] and p1[1] >= p3[1]):
+        top = p1
+        if(p2[1] > p3[1]):
+            middle = p2
+            bottom = p3
+        else:
+            middle = p3
+            bottom = p2
+    elif(p2[1] >= p1[1] and p2[1] >= p3[1]):
+        top = p2
+        if(p1[1] > p3[1]):
+            middle = p1
+            bottom = p3
+        else:
+            middle = p3
+            bottom = p1
+    else:
+        top = p3
+        if(p1[1] > p2[1]):
+            middle = p1
+            bottom = p2
+        else:
+            middle = p2
+            bottom = p1
+
+def draw_scanline(polygons, x0, y0, x1, y1):
+    #swap points if going right -> left
+    if x0 > x1:
+        xt = x0
+        yt = y0
+        x0 = x1
+        y0 = y1
+        x1 = xt
+        y1 = yt
+
+    x = x0
+    y = y0
+
+    while(x <= x1):
+        plot( screen, zbuffer, color, x, y, 0 )
+        x += 1
+
 
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0)
