@@ -33,7 +33,7 @@ def scanline_convert(polygons, i, screen, zbuffer ):
         else:
             middle = p2
             bottom = p1
-    print([bottom[1], middle[1], top[1]])
+    #print([bottom[1], middle[1], top[1]])
 
     #initial setup
     if(bottom[1] != middle[1]):
@@ -42,7 +42,6 @@ def scanline_convert(polygons, i, screen, zbuffer ):
     else:
         x0 = bottom[0]
         x1 = middle[0]
-        print("yes")
     y = int(bottom[1])
     #print([x0, x1, y])
 
@@ -62,6 +61,19 @@ def scanline_convert(polygons, i, screen, zbuffer ):
     #print([dx0, dx1, dx1_1])
     color = [random.randrange(255), random.randrange(255), random.randrange(255)]
 
+    while(y <= middle[1]):
+        #draw horizontal line
+        #print([x0, x1])
+        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y)
+        #move endpoints
+        if(dx0 != None):
+            x0 += dx0
+        if(dx1 != None):
+            x1 += dx1
+        y += 1
+    x1 = middle[0]
+    y = int(middle[1])
+    dx1 = dx1_1
     while(y <= top[1]):
         #draw horizontal line
         #print([x0, x1])
@@ -72,9 +84,6 @@ def scanline_convert(polygons, i, screen, zbuffer ):
         if(dx1 != None):
             x1 += dx1
         y += 1
-        #swap dx1 if needed
-        if(y >= middle[1]):
-            dx1 = dx1_1
 
 def draw_scanline(screen, zbuffer, color, x0, x1, y):
     #swap points if going right -> left
@@ -105,7 +114,7 @@ def draw_polygons( polygons, screen, zbuffer, color ):
         normal = calculate_normal(polygons, point)[:]
         #print normal
         if normal[2] > 0:
-            draw_line( int(polygons[point][0]),
+            '''draw_line( int(polygons[point][0]),
                        int(polygons[point][1]),
                        polygons[point][2],
                        int(polygons[point+1][0]),
@@ -125,7 +134,7 @@ def draw_polygons( polygons, screen, zbuffer, color ):
                        int(polygons[point+2][0]),
                        int(polygons[point+2][1]),
                        polygons[point+2][2],
-                       screen, zbuffer, color)
+                       screen, zbuffer, color)'''
 
             scanline_convert(polygons, point, screen, zbuffer)
 
