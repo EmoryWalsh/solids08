@@ -1,12 +1,14 @@
 from display import *
 from matrix import *
 from gmath import *
+import random
 
-def scanline_convert(polygons, i):#, screen, zbuffer ):
+def scanline_convert(polygons, i, screen, zbuffer ):
     p1 = polygons[i]
     p2 = polygons[i+1]
     p3 = polygons[i+2]
-    #find the top point
+
+    #find the top middle bottom points
     if(p1[1] >= p2[1] and p1[1] >= p3[1]):
         top = p1
         if(p2[1] > p3[1]):
@@ -31,24 +33,61 @@ def scanline_convert(polygons, i):#, screen, zbuffer ):
         else:
             middle = p2
             bottom = p1
+    print([bottom[1], middle[1], top[1]])
 
-def draw_scanline(polygons, x0, y0, x1, y1):
+    #initial setup
+    if(bottom[1] != middle[1]):
+        x0 = bottom[0]
+        x1 = bottom[0]
+    else:
+        x0 = bottom[0]
+        x1 = middle[0]
+        print("yes")
+    y = int(bottom[1])
+    #print([x0, x1, y])
+
+    #find slopes
+    if(top[1] - bottom[1] != 0):
+        dx0 = (top[0]-bottom[0])/(top[1]-bottom[1])
+    else:
+        dx0 = None
+    if(middle[1] - bottom[1] != 0):
+        dx1 = (middle[0]-bottom[0])/(middle[1]-bottom[1])
+    else:
+        dx1 = None
+    if(top[1] - middle[1] != 0):
+        dx1_1 = (top[0]-middle[0])/(top[1]-middle[1])
+    else:
+        dx1_1 = None
+    #print([dx0, dx1, dx1_1])
+    color = [random.randrange(255), random.randrange(255), random.randrange(255)]
+
+    while(y <= top[1]):
+        #draw horizontal line
+        #print([x0, x1])
+        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y)
+        #move endpoints
+        if(dx0 != None):
+            x0 += dx0
+        if(dx1 != None):
+            x1 += dx1
+        y += 1
+        #swap dx1 if needed
+        if(y >= middle[1]):
+            dx1 = dx1_1
+
+def draw_scanline(screen, zbuffer, color, x0, x1, y):
     #swap points if going right -> left
     if x0 > x1:
         xt = x0
-        yt = y0
         x0 = x1
-        y0 = y1
         x1 = xt
-        y1 = yt
 
     x = x0
-    y = y0
 
     while(x <= x1):
         plot( screen, zbuffer, color, x, y, 0 )
         x += 1
-
 
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0)
@@ -87,6 +126,9 @@ def draw_polygons( polygons, screen, zbuffer, color ):
                        int(polygons[point+2][1]),
                        polygons[point+2][2],
                        screen, zbuffer, color)
+
+            scanline_convert(polygons, point, screen, zbuffer)
+
         point+= 3
 
 
