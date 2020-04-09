@@ -36,20 +36,15 @@ def scanline_convert(polygons, i, screen, zbuffer ):
     #print([bottom[1], middle[1], top[1]])
 
     #initial setup
-    if(bottom[1] != middle[1]):
-        x0 = bottom[0]
-        x1 = bottom[0]
-    else:
-        x0 = bottom[0]
-        x1 = middle[0]
+    x0 = bottom[0]
+    x1 = bottom[0]
+    z0 = bottom[2]
+    z1 = bottom[2]
     y = int(bottom[1])
     #print([x0, x1, y])
 
-    #find slopes
-    if(top[1] - bottom[1] != 0):
-        dx0 = (top[0]-bottom[0])/(top[1]-bottom[1])
-    else:
-        dx0 = None
+    #find x slopes
+    dx0 = (top[0]-bottom[0])/(top[1]-bottom[1])
     if(middle[1] - bottom[1] != 0):
         dx1 = (middle[0]-bottom[0])/(middle[1]-bottom[1])
     else:
@@ -58,26 +53,43 @@ def scanline_convert(polygons, i, screen, zbuffer ):
         dx1_1 = (top[0]-middle[0])/(top[1]-middle[1])
     else:
         dx1_1 = None
+
+    #find z slopes
+    dz0 = (top[2]-bottom[2])/(top[1]-bottom[1])
+    if(middle[1] - bottom[1] != 0):
+        dz1 = (middle[2]-bottom[2])/(middle[1]-bottom[1])
+    else:
+        dz1 = None
+    if(top[1] - middle[1] != 0):
+        dz1_1 = (top[2]-middle[2])/(top[1]-middle[1])
+    else:
+        dz1_1 = None
     #print([dx0, dx1, dx1_1])
     color = [random.randrange(255), random.randrange(255), random.randrange(255)]
 
-    while(y <= middle[1]):
+    while(y < middle[1]):
         #draw horizontal line
         #print([x0, x1])
-        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y)
+        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y, int(z0), int(z1))
         #move endpoints
         if(dx0 != None):
             x0 += dx0
         if(dx1 != None):
             x1 += dx1
+        if(dz0 != None):
+            z0 += dz0
+        if(dz1 != None):
+            z1 += dz1
         y += 1
     x1 = middle[0]
+    z1 = middle[2]
     y = int(middle[1])
     dx1 = dx1_1
+    dz1 = dz1_1
     while(y <= top[1]):
         #draw horizontal line
         #print([x0, x1])
-        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y)
+        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y, int(z0), int(z1))
         #move endpoints
         if(dx0 != None):
             x0 += dx0
@@ -85,18 +97,28 @@ def scanline_convert(polygons, i, screen, zbuffer ):
             x1 += dx1
         y += 1
 
-def draw_scanline(screen, zbuffer, color, x0, x1, y):
+def draw_scanline(screen, zbuffer, color, x0, x1, y, z0, z1):
     #swap points if going right -> left
     if x0 > x1:
         xt = x0
+        zt = z0
         x0 = x1
+        z0 = z1
         x1 = xt
+        z1 = zt
 
     x = x0
+    z = z0
+    if(x1 - x0 != 0):
+        dz = (z1 - z0) / (x1 - x0)
+    else:
+        dz = None
 
     while(x <= x1):
         plot( screen, zbuffer, color, x, y, 0 )
         x += 1
+        if(dz != None):
+            z += dz
 
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0)
@@ -354,13 +376,17 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
     if x0 > x1:
         xt = x0
         yt = y0
+        z1 = z0
         x0 = x1
         y0 = y1
+        z0 = z1
         x1 = xt
         y1 = yt
+        z1 = zt
 
     x = x0
     y = y0
+    z = z0
     A = 2 * (y1 - y0)
     B = -2 * (x1 - x0)
     wide = False
@@ -373,6 +399,7 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
         dx_east = dx_northeast = 1
         dy_east = 0
         d_east = A
+        d_z = (z1 - z0) / (x1 - x0)
         if ( A > 0 ): #octant 1
             d = A + B/2
             dy_northeast = 1
@@ -391,6 +418,7 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             dy_east = dy_northeast = 1
             d_northeast = A + B
             d_east = B
+            d_z = (d1 - d0) / (y1 - y0)
             loop_start = y
             loop_end = y1
         else: #octant 7
