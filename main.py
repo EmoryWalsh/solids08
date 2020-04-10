@@ -14,5 +14,5 @@ ident(t)
 csystems = [ t ]
 
 
-parse_file( 'newscript', edges, polygons, csystems, screen, zbuffer, color )
+parse_file( 'script', edges, polygons, csystems, screen, zbuffer, color )
 #print_matrix(zbuffer)
