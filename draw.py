@@ -70,7 +70,7 @@ def scanline_convert(polygons, i, screen, zbuffer ):
     while(y < middle[1]):
         #draw horizontal line
         #print([x0, x1])
-        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y, int(z0), int(z1))
+        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y, z0, z1)
         #move endpoints
         if(dx0 != None):
             x0 += dx0
@@ -89,7 +89,7 @@ def scanline_convert(polygons, i, screen, zbuffer ):
     while(y <= top[1]):
         #draw horizontal line
         #print([x0, x1])
-        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y, int(z0), int(z1))
+        draw_scanline(screen, zbuffer, color, int(x0), int(x1), y, z0, z1)
         #move endpoints
         if(dx0 != None):
             x0 += dx0
